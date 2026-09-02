@@ -70,14 +70,32 @@ def save_json(path, obj):
 # ---------------------------------------------------------------- 1. 检索候选
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 
+# 临床向标题特征词(优先) 与 基础研究特征词(垫底)
+_CLIN_TITLE = ["patients", "patient", "randomized", "trial", "cohort", "guideline",
+    "outcomes", "outcome", "survival", "meta-analysis", "systematic review", "real-world",
+    "treatment", "therapy", "surgery", "surgical", "prognos", "diagnosis", "detection",
+    "risk", "efficacy", "safety", "comparative", "prospective", "retrospective",
+    "recurrence", "follow-up", "management", "complication", "biopsy", "mortality",
+    "incidence", "score", "nomogram", "transplant", "perioperative", "quality of life"]
+_BASIC_TITLE = ["in vitro", "mouse", "mice", "rat", "cell line", "cells",
+    "expression", "pathway", "signaling", "knockdown", "knockout", "overexpression",
+    "molecular", "mechanism", "xenograft", "organoid", "lncrna", "mirna", "circrna",
+    "single-cell", "single cell", "proteomic", "transcriptomic", "zebrafish", "decoction",
+    "herbal", "phytotherapy", "traditional chinese medicine"]
+
+def title_tier(title):
+    """2=临床优先, 1=中性, 0=基础/机制类(最后选)"""
+    tl = (title or "").lower()
+    clin = any(k in tl for k in _CLIN_TITLE)
+    basic = any(k in tl for k in _BASIC_TITLE)
+    if basic and not clin:
+        return 0
+    return 2 if clin else 1
+
 def build_query(cfg):
-    kw = cfg.get("keywords", [])
+    """仅从泌尿临床期刊白名单取文, 不再用全网关键词(避免中药/民药类基础研究混入)"""
     jn = cfg.get("journals", [])
-    parts = []
-    for k in kw:
-        parts.append('"%s"[Title/Abstract]' % k)
-    for j in jn:
-        parts.append('"%s"[Journal]' % j)
+    parts = ['"%s"[Journal]' % j for j in jn]
     days = int(cfg.get("days_window", 270))
     since = (datetime.date.today() - datetime.timedelta(days=days)).strftime("%Y/%m/%d")
     q = "(%s) AND English[lang] AND (%s[Date - Publication] : 3000[Date - Publication])" % (
@@ -257,6 +275,8 @@ def main():
         log("no candidates found")
         return
     metas = fetch_summaries(pids)
+    # 临床向优先排序: 2 临床 > 1 中性 > 0 基础(稳定排序保留原有时间序)
+    pids.sort(key=lambda p: title_tier(metas.get(p, {}).get("title", "")), reverse=True)
 
     chosen = None
     for pid in pids:
