@@ -1,0 +1,38 @@
+{
+  "sendkey": "SCT410423TVJmHJHpEERSlxXhKs8hHQTgN",
+  "langpair": "en|zh-CN",
+  "days_window": 270,
+  "retmax": 60,
+  "keywords": [
+    "prostate cancer",
+    "bladder cancer",
+    "renal cell carcinoma",
+    "urothelial carcinoma",
+    "benign prostatic hyperplasia",
+    "urinary stone",
+    "urolithiasis",
+    "kidney cancer",
+    "testicular cancer",
+    "penile cancer",
+    "ureteroscopy",
+    "radical prostatectomy",
+    "radical cystectomy",
+    "prostate biopsy",
+    "PSMA PET"
+  ],
+  "journals": [
+    "The Journal of Urology",
+    "European Urology",
+    "European Urology Oncology",
+    "European Urology Focus",
+    "BJU International",
+    "Urology",
+    "World Journal of Urology",
+    "Urologic Oncology",
+    "Prostate Cancer and Prostatic Diseases",
+    "The Prostate",
+    "Journal of Endourology",
+    "Neurourology and Urodynamics",
+    "International Journal of Urology"
+  ]
+}
